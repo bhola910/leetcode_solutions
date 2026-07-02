@@ -21,3 +21,16 @@ public:
         reverse(nums.begin() + i + 1, nums.end());
     }
 };
+
+// testing
+int main()
+{
+    Solution sol;
+    vector<int> nums = {1, 2, 3};
+    sol.nextPermutation(nums);
+    for (int n : nums)
+    {
+        cout << n << " ";
+    }
+    return 0;
+}
