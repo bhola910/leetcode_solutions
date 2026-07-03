@@ -1,0 +1,27 @@
+{
+    "project": {
+        "name": "LeetCode Automation",
+        "version": "1.0.0"
+    },
+
+    "repository": {
+        "path": "C:/Users/bhola/Developer/cplusplus/leetcode_solutions",
+        "branch": "main",
+        "remote": "origin"
+    },
+
+    "watcher": {
+        "directory": "solutions",
+        "extensions": [
+            ".cpp",
+            ".py",
+            ".java"
+        ],
+        "debounce_seconds": 5
+    },
+
+    "logging": {
+        "file": "logs/automation.log",
+        "level": "INFO"
+    }
+}

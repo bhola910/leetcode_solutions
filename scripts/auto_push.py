@@ -1,18 +1,18 @@
 import subprocess
 import time
 from pathlib import Path
+
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 REPO = Path(r"C:\Users\bhola\Developer\cplusplus\leetcode_solutions")
 
-last_event = 0
-DELAY = 10  # seconds between commits
+last_push = 0
 
 
 class Handler(FileSystemEventHandler):
     def on_modified(self, event):
-        global last_event
+        global last_push
 
         if event.is_directory:
             return
@@ -20,47 +20,46 @@ class Handler(FileSystemEventHandler):
         if not event.src_path.endswith(".cpp"):
             return
 
-        now = time.time()
-
-        if now - last_event < DELAY:
+        if ".git" in event.src_path:
             return
 
-        last_event = now
+        now = time.time()
 
-        file_path = Path(event.src_path)
+        # prevent multiple pushes caused by one save
+        if now - last_push < 5:
+            return
 
-        # Use the folder name as the commit message
-        problem = file_path.parent.name
+        last_push = now
 
-        print(f"\nDetected change in: {problem}")
+        print(f"\nDetected change: {event.src_path}")
 
         time.sleep(2)
 
         subprocess.run(["git", "add", "."], cwd=REPO)
 
         commit = subprocess.run(
-            ["git", "commit", "-m", f"Solved {problem}"],
+            ["git", "commit", "-m", "Update LeetCode Solution"],
             cwd=REPO,
             capture_output=True,
             text=True,
         )
 
-        output = (commit.stdout + commit.stderr).lower()
-
-        if "nothing to commit" in output:
-            print("No changes to commit.")
+        if "nothing to commit" in commit.stdout.lower():
+            print("Nothing to commit.")
             return
+
+        print("Pushing to GitHub...")
 
         subprocess.run(["git", "push"], cwd=REPO)
 
-        print(f"✓ Pushed: Solved {problem}")
+        print("Done!")
 
 
 observer = Observer()
 observer.schedule(Handler(), str(REPO), recursive=True)
 observer.start()
 
-print("🚀 Watching LeetCode repository...")
+print("Watching your LeetCode repository...")
 
 try:
     while True:
