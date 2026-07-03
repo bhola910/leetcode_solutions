@@ -51,3 +51,14 @@ class ConfigManager:
                 raise KeyError(
                     f"Missing required configuration section: '{section}'"
                 )
+            
+    def get(self, key: str):
+        """Return a configuration value using dot notation."""
+
+        current = self._config
+        parts = key.split(".")
+
+        for part in parts:
+            current = current[part]
+
+        return current
