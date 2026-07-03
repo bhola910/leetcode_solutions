@@ -6,6 +6,7 @@ Handles loading and accessing the application's configuration.
 
 import json
 from pathlib import Path
+from typing import Any
 
 
 class ConfigManager:
@@ -28,13 +29,14 @@ class ConfigManager:
                 self._config = json.load(file)
 
         except FileNotFoundError:
-            print("Configuration file not found.")
+            raise FileNotFoundError(
+                f"Configuration file not found: {self._config_path}"
+            )
 
-        except json.JSONDecodeError:
-            print("Configuration file contains invalid JSON.")
-
-        except Exception as error:
-            print(f"Unexpected error: {error}")
+        except json.JSONDecodeError as error:
+            raise ValueError(
+                f"Invalid JSON in configuration file: {error}"
+            ) from error
 
     def validate(self) -> None:
         """Validate required configuration sections."""
@@ -51,14 +53,19 @@ class ConfigManager:
                 raise KeyError(
                     f"Missing required configuration section: '{section}'"
                 )
-            
-    def get(self, key: str):
+
+    def get(self, key: str) -> Any:
         """Return a configuration value using dot notation."""
 
         current = self._config
-        parts = key.split(".")
 
-        for part in parts:
+        for part in key.split("."):
             current = current[part]
 
         return current
+
+    def reload(self) -> None:
+        """Reload and validate the configuration."""
+
+        self.load()
+        self.validate()
