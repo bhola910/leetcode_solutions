@@ -31,3 +31,17 @@ All notable changes to this project will be documented in this file.
 - Configuration validation.
 - Nested configuration access (`get()`).
 - Configuration reload support.
+
+## [0.3.0] - 2026-07-06
+
+### Added
+
+- GitManager
+- Git status support
+- Git add support
+- Git commit support
+- Git push support
+- Git pull support
+- Current branch detection
+- Repository clean check
+- Shared Git command executor
