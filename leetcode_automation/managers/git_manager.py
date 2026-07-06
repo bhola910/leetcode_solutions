@@ -17,14 +17,12 @@ class GitManager:
 
         self._logger = Logger()
 
-    def status(self) -> str:
-        """Return the current Git status."""
-
-        self._logger.info("Running git status...")
+    def _run_git_command(self, command: list[str]) -> str:
+        """Execute a Git command and return its output."""
 
         try:
             result = subprocess.run(
-                ["git", "status"],
+                command,
                 capture_output=True,
                 text=True,
                 check=True,
@@ -33,28 +31,28 @@ class GitManager:
             return result.stdout
 
         except subprocess.CalledProcessError as error:
-            self._logger.error(
-                f"Git status failed: {error}"
-            )
+            self._logger.error(f"Git command failed: {error}")
             raise
+
+    
+
+    def status(self) -> str:
+        """Return the current Git status."""
+
+        self._logger.info("Running git status...")
+
+        return self._run_git_command(
+            ["git", "status"]
+        )
     
     def add(self, path: str = ".") -> None:
         """Stage files or directories for commit."""
 
         self._logger.info(f"Running git add '{path}'...")
 
-        try:
-            subprocess.run(
-                ["git", "add", path],
-                check=True,
-                text=True,
-            )
-
-        except subprocess.CalledProcessError as error:
-            self._logger.error(
-                f"Git add failed: {error}"
-            )
-            raise
+        self._run_git_command(
+            ["git", "add", path]
+        )
         
 
     def commit(self, message: str) -> None:
