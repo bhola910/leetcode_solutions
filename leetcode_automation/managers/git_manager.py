@@ -17,13 +17,56 @@ class GitManager:
 
         self._logger = Logger()
 
-    def status(self) -> None:
-        """Display the current Git status."""
+    def status(self) -> str:
+        """Return the current Git status."""
 
         self._logger.info("Running git status...")
 
+        try:
+            result = subprocess.run(
+                ["git", "status"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+            return result.stdout
+
+        except subprocess.CalledProcessError as error:
+            self._logger.error(
+                f"Git status failed: {error}"
+            )
+            raise
+    
+    def add(self, path: str = ".") -> None:
+        """Stage files or directories for commit."""
+
+        self._logger.info(f"Running git add {path}...")
+
         subprocess.run(
-            ["git", "status"],
+            ["git", "add", path],
             check=True,
             text=True,
-        )
+    )
+        
+
+    def commit(self, message: str) -> None:
+        """Create a Git commit."""
+
+        if not message.strip():
+            raise ValueError("Commit message cannot be empty.")
+
+        self._logger.info(f"Running git commit: '{message}'")
+
+        try:
+            subprocess.run(
+                ["git", "commit", "-m", message],
+                check=True,
+                text=True,
+            )
+
+        except subprocess.CalledProcessError as error:
+            self._logger.error(
+                f"Git commit failed: {error}"
+            )
+            raise
