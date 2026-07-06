@@ -4,9 +4,13 @@ from leetcode_automation.managers.git_manager import GitManager
 def main():
     git = GitManager()
 
-    git.add()
+    print("Current Branch:")
+    print(git.current_branch())
 
-    git.commit("Test commit from GitManager")
+    print()
+
+    print("Repository Clean:")
+    print(git.repository_clean())
 
 
 if __name__ == "__main__":

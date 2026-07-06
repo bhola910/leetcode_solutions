@@ -28,13 +28,11 @@ class GitManager:
                 check=True,
             )
 
-            return result.stdout
+            return result.stdout if result.stdout else result.stderr
 
         except subprocess.CalledProcessError as error:
             self._logger.error(f"Git command failed: {error}")
             raise
-
-    
 
     def status(self) -> str:
         """Return the current Git status."""
@@ -44,7 +42,7 @@ class GitManager:
         return self._run_git_command(
             ["git", "status"]
         )
-    
+
     def add(self, path: str = ".") -> None:
         """Stage files or directories for commit."""
 
@@ -53,7 +51,6 @@ class GitManager:
         self._run_git_command(
             ["git", "add", path]
         )
-        
 
     def commit(self, message: str) -> None:
         """Create a Git commit."""
@@ -63,15 +60,56 @@ class GitManager:
 
         self._logger.info(f"Running git commit: '{message}'")
 
-        try:
-            subprocess.run(
-                ["git", "commit", "-m", message],
-                check=True,
-                text=True,
-            )
+        self._run_git_command(
+            ["git", "commit", "-m", message]
+        )
 
-        except subprocess.CalledProcessError as error:
-            self._logger.error(
-                f"Git commit failed: {error}"
-            )
-            raise
+    def push(
+        self,
+        remote: str = "origin",
+        branch: str = "main",
+    ) -> str:
+        """Push commits to the remote repository."""
+
+        self._logger.info(
+            f"Running git push {remote} {branch}..."
+        )
+
+        return self._run_git_command(
+            ["git", "push", remote, branch]
+        )
+    
+
+    def pull(
+        self,
+        remote: str = "origin",
+        branch: str = "main",
+    ) -> str:
+        """Pull changes from the remote repository."""
+
+        self._logger.info(
+            f"Running git pull {remote} {branch}..."
+        )
+
+        return self._run_git_command(
+            ["git", "pull", remote, branch]
+        )
+    
+
+    def current_branch(self) -> str:
+        """Return the current Git branch."""
+
+        self._logger.info(
+            "Getting current Git branch..."
+        )
+
+        return self._run_git_command(
+            ["git", "branch", "--show-current"]
+        ).strip()
+    
+    def repository_clean(self) -> bool:
+        """Return True if the repository has no changes."""
+
+        status = self.status()
+
+        return "nothing to commit" in status.lower()
