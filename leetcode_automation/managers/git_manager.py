@@ -41,13 +41,20 @@ class GitManager:
     def add(self, path: str = ".") -> None:
         """Stage files or directories for commit."""
 
-        self._logger.info(f"Running git add {path}...")
+        self._logger.info(f"Running git add '{path}'...")
 
-        subprocess.run(
-            ["git", "add", path],
-            check=True,
-            text=True,
-    )
+        try:
+            subprocess.run(
+                ["git", "add", path],
+                check=True,
+                text=True,
+            )
+
+        except subprocess.CalledProcessError as error:
+            self._logger.error(
+                f"Git add failed: {error}"
+            )
+            raise
         
 
     def commit(self, message: str) -> None:
