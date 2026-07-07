@@ -3,7 +3,7 @@ file_watcher.py
 
 Monitors the solutions directory for file changes.
 """
-
+import threading
 import time
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
@@ -14,18 +14,51 @@ from leetcode_automation.utils.logger import Logger
 class SolutionEventHandler(FileSystemEventHandler):
     """Handles file system events."""
 
-    def __init__(self):
-        self._logger = Logger()
+    def __init__(
+        self,
+        extensions: list[str],
+        debounce_seconds: int,
+    ) -> None:
+        """Initialize the event handler."""
 
-    def on_created(self, event):
+        super().__init__()
+
+        self._logger = Logger()
+        self._extensions = tuple(extensions)
+        self._debounce = debounce_seconds
+        self._timer = None
+
+    def _process_file(self, path: str) -> None:
+        """Process the detected solution."""
+
+        self._logger.info(
+            f"Processing solution: {path}"
+        )
+
+    def on_created(self, event) -> None:
         """Called when a new file is created."""
 
         if event.is_directory:
             return
 
+        if not event.src_path.endswith(self._extensions):
+            return
+
         self._logger.info(
-            f"New file detected: {event.src_path}"
+            f"Detected: {event.src_path}"
         )
+
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(
+            self._debounce,
+            self._process_file,
+            args=[event.src_path],
+        )
+
+        self._timer.start()
+
 
 class FileWatcher:
     """Watches the solutions directory."""
@@ -51,7 +84,10 @@ class FileWatcher:
     def start(self) -> None:
         """Start watching the solutions directory."""
 
-        event_handler = SolutionEventHandler()
+        event_handler = SolutionEventHandler(
+            self._extensions,
+            self._debounce,
+        )
 
         observer = Observer()
 
