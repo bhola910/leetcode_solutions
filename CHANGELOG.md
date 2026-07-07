@@ -45,3 +45,19 @@ All notable changes to this project will be documented in this file.
 - Current branch detection
 - Repository clean check
 - Shared Git command executor
+
+## [0.4.0] - 2026-07-07
+
+### Added
+
+- FileWatcher service
+- Watchdog integration
+- File extension filtering
+- Debounce mechanism
+- Current branch detection
+- Repository clean status check
+
+### Improved
+
+- Refactored GitManager using a shared Git command executor
+- Improved logging across modules

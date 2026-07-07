@@ -18,6 +18,7 @@ class SolutionEventHandler(FileSystemEventHandler):
         self,
         extensions: list[str],
         debounce_seconds: int,
+        callback,
     ) -> None:
         """Initialize the event handler."""
 
@@ -27,6 +28,7 @@ class SolutionEventHandler(FileSystemEventHandler):
         self._extensions = tuple(extensions)
         self._debounce = debounce_seconds
         self._timer = None
+        self._callback = callback
 
     def _process_file(self, path: str) -> None:
         """Process the detected solution."""
@@ -34,6 +36,7 @@ class SolutionEventHandler(FileSystemEventHandler):
         self._logger.info(
             f"Processing solution: {path}"
         )
+        self._callback(path)
 
     def on_created(self, event) -> None:
         """Called when a new file is created."""
@@ -63,11 +66,11 @@ class SolutionEventHandler(FileSystemEventHandler):
 class FileWatcher:
     """Watches the solutions directory."""
 
-    def __init__(self) -> None:
+    def __init__(self, callback) -> None:
         """Initialize the file watcher."""
 
         self._logger = Logger()
-
+        self._callback = callback
         self._config = ConfigManager()
 
         self._watch_directory = self._config.get(
@@ -87,6 +90,7 @@ class FileWatcher:
         event_handler = SolutionEventHandler(
             self._extensions,
             self._debounce,
+            self._callback,
         )
 
         observer = Observer()
