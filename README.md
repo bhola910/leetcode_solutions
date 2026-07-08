@@ -1,1 +1,12 @@
-hi this is my project that helps users to auto push their code on github via python automation
+# LeetCode Solutions
+
+## 📊 Statistics
+
+- Total Solutions: 4
+- C++: 2
+- Python: 1
+- Java: 1
+
+## 🆕 Latest Solution
+
+- Valid Parentheses
