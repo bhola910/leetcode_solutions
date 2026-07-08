@@ -42,6 +42,18 @@ class GitManager:
         return self._run_git_command(
             ["git", "status"]
         )
+    
+
+    def status_porcelain(self) -> str:
+        """Return Git status in porcelain format."""
+
+        self._logger.info(
+            "Running git status --porcelain..."
+        )
+
+        return self._run_git_command(
+            ["git", "status", "--porcelain"]
+        )
 
     def add(self, path: str = ".") -> None:
         """Stage files or directories for commit."""
