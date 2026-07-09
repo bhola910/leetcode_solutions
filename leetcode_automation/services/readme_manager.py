@@ -9,13 +9,16 @@ from pathlib import Path
 from leetcode_automation.services.stats_manager import (
     StatsManager,
 )
+from leetcode_automation.utils.logger import Logger
 
 
 class ReadmeManager:
-    """Updates README.md."""
+    """Updates the repository README."""
 
     def __init__(self) -> None:
         """Initialize the README manager."""
+
+        self._logger = Logger()
 
         self._stats = StatsManager()
 
@@ -41,14 +44,28 @@ class ReadmeManager:
 - {stats["latest_problem"]}
 """
 
-    def update(self) -> None:
-        """Update README."""
-
-        stats = self._stats.generate()
-
-        content = self._build_content(stats)
+    def _write(
+        self,
+        content: str,
+    ) -> None:
+        """Write content to README."""
 
         self._readme.write_text(
             content,
             encoding="utf-8",
+        )
+
+    def update(self) -> None:
+        """Update the repository README."""
+
+        stats = self._stats.generate()
+
+        content = self._build_content(
+            stats
+        )
+
+        self._write(content)
+
+        self._logger.info(
+            "README updated successfully."
         )
