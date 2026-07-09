@@ -30,82 +30,109 @@ class AutomationWorkflow:
 
         self._logger = Logger()
         self._git = GitManager()
-        self._change_detector = ChangeDetector()
-        self._commit_generator = (
-            CommitMessageGenerator()
-        )
-        self._readme = ReadmeManager()
         self._parser = SolutionParser()
+        self._readme = ReadmeManager()
+        self._change_detector = ChangeDetector()
+        self._commit_generator = CommitMessageGenerator()
+
+    def _parse_solution(self, path: str):
+        """Parse the solution file."""
+
+        try:
+            return self._parser.parse(path)
+
+        except ValueError as error:
+            self._logger.error(str(error))
+            return None
+
+    def _log_changes(self) -> bool:
+        """Log detected Git changes."""
+
+        changes = (
+            self._change_detector.get_solution_changes()
+        )
+
+        if not changes:
+
+            self._logger.warning(
+                "No solution changes detected."
+            )
+
+            return False
+
+        self._logger.info(
+            f"Detected {len(changes)} Git change(s):"
+        )
+
+        for change in changes:
+
+            self._logger.info(
+                f"{change.status} -> {change.path}"
+            )
+
+        return True
+
+    def _update_repository(
+        self,
+        commit_message: str,
+    ) -> None:
+        """Update the repository."""
+
+        self._readme.update()
+
+        self._logger.info(
+            "README updated successfully."
+        )
+
+        self._git.add()
+
+        self._logger.info(
+            "Files staged successfully."
+        )
+
+        self._git.commit(commit_message)
+
+        self._logger.info(
+            "Commit created successfully."
+        )
 
     def run(self, path: str) -> None:
         """Run the automation workflow."""
 
+        self._logger.info(
+            f"Starting automation for: {path}"
+        )
+
+        solution = self._parse_solution(path)
+
+        if solution is None:
+            return
+
+        commit_message = (
+            self._commit_generator.generate(
+                solution
+            )
+        )
+
+        self._logger.info(
+            f"Commit message: {commit_message}"
+        )
+
+        if self._git.repository_clean():
+
+            self._logger.info(
+                "Repository is already clean."
+            )
+
+            return
+
+        if not self._log_changes():
+            return
+
         try:
-            self._logger.info(
-                f"Starting automation for: {path}"
-            )
 
-            try:
-                solution = self._parser.parse(path)
-
-            except ValueError as error:
-                self._logger.error(str(error))
-                return
-
-            commit_message = (
-                self._commit_generator.generate(
-                    solution
-                )
-            )
-
-            self._logger.info(
-                f"Commit message: {commit_message}"
-            )
-
-            if self._git.repository_clean():
-                self._logger.info(
-                    "Repository is already clean."
-                )
-                return
-
-            solution_changes = (
-                self._change_detector.get_solution_changes()
-            )
-
-            if not solution_changes:
-                self._logger.warning(
-                    "No solution changes detected."
-                )
-                return
-
-            self._logger.info(
-                "Detected Git changes:"
-            )
-
-            for change in solution_changes:
-
-                self._logger.info(
-                    f"{change.status} -> {change.path}"
-                )
-
-            self._readme.update()
-
-            self._logger.info(
-                "README updated successfully."
-            )
-
-            self._git.add()
-
-            self._logger.info(
-                "Files staged successfully."
-            )
-
-            self._git.commit(
+            self._update_repository(
                 commit_message
-            )
-
-            self._logger.info(
-                "Commit created successfully."
             )
 
         except Exception as error:
