@@ -1,7 +1,7 @@
 {
-    "total_solutions": 4,
-    "cpp": 2,
+    "total_solutions": 5,
+    "cpp": 3,
     "python": 1,
     "java": 1,
-    "latest_problem": "Valid Parentheses"
+    "latest_problem": "Merge Sorted Array"
 }

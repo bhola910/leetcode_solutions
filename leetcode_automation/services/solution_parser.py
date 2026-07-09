@@ -6,46 +6,77 @@ Parses solution filenames.
 
 from pathlib import Path
 
-from leetcode_automation.models.solution import Solution
+from leetcode_automation.models.solution import (
+    Solution,
+)
 
 
 class SolutionParser:
     """Parses solution files."""
 
-    def parse(self, path: str) -> Solution:
+    SUPPORTED_LANGUAGES = {
+        ".cpp": "C++",
+        ".py": "Python",
+        ".java": "Java",
+    }
+
+    def _format_title(
+        self,
+        title: str,
+    ) -> str:
+        """Format a problem title."""
+
+        return title.replace(
+            "_",
+            " ",
+        ).title()
+
+    def parse(
+        self,
+        path: str,
+    ) -> Solution:
         """Parse a solution path."""
 
-        file = Path(path)
+        solution_file = Path(path)
 
-        file_name = file.stem
-        extension = file.suffix
+        file_name = solution_file.stem
 
-        parts = file_name.split("_", maxsplit=1)
+        extension = solution_file.suffix
+
+        parts = file_name.split(
+            "_",
+            maxsplit=1,
+        )
 
         if len(parts) != 2:
+
             raise ValueError(
                 "Invalid filename. Expected format: "
-                "'0001_two_sum.cpp'"
+                "'0001_two_sum.cpp'."
             )
 
         try:
+
             number = int(parts[0])
+
         except ValueError as error:
+
             raise ValueError(
                 "Problem number must be numeric."
             ) from error
 
-        title = parts[1].replace("_", " ").title()
+        title = self._format_title(
+            parts[1]
+        )
 
-        languages = {
-            ".cpp": "C++",
-            ".py": "Python",
-            ".java": "Java",
-        }
-
-        language = languages.get(extension)
+        language = (
+            self.SUPPORTED_LANGUAGES.get(
+                extension
+            )
+        )
 
         if language is None:
+
             raise ValueError(
                 f"Unsupported file extension: {extension}"
             )

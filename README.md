@@ -2,11 +2,11 @@
 
 ## 📊 Statistics
 
-- Total Solutions: 4
-- C++: 2
+- Total Solutions: 5
+- C++: 3
 - Python: 1
 - Java: 1
 
 ## 🆕 Latest Solution
 
-- Valid Parentheses
+- Merge Sorted Array
