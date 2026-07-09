@@ -122,6 +122,40 @@ class GitManager:
     def repository_clean(self) -> bool:
         """Return True if the repository has no changes."""
 
-        status = self.status()
+        return not self.status_porcelain().strip()
+    
+    def repository_exists(self) -> bool:
+        """Return True if the current directory is a Git repository."""
 
-        return "nothing to commit" in status.lower()
+        try:
+
+            self._run_git_command(
+                ["git", "rev-parse", "--git-dir"]
+            )
+
+            return True
+
+        except Exception:
+
+            return False
+        
+    def has_remote(self) -> bool:
+        """Return True if the repository has a remote."""
+
+        output = self._run_git_command(
+            ["git", "remote"]
+        )
+
+        return bool(output.strip())
+    
+    def branch_exists(
+        self,
+        branch: str,
+    ) -> bool:
+        """Return True if the branch exists."""
+
+        output = self._run_git_command(
+            ["git", "branch", "--list", branch]
+        )
+
+        return bool(output.strip())

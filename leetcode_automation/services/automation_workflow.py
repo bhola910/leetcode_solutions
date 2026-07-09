@@ -16,6 +16,9 @@ from leetcode_automation.services.commit_message_generator import (
 from leetcode_automation.services.readme_manager import (
     ReadmeManager,
 )
+from leetcode_automation.services.solution_parser import (
+    SolutionParser,
+)
 from leetcode_automation.utils.logger import Logger
 
 
@@ -32,66 +35,81 @@ class AutomationWorkflow:
             CommitMessageGenerator()
         )
         self._readme = ReadmeManager()
+        self._parser = SolutionParser()
 
     def run(self, path: str) -> None:
         """Run the automation workflow."""
 
-        self._logger.info(
-            f"Starting automation for: {path}"
-        )
-
-        if self._git.repository_clean():
+        try:
             self._logger.info(
-                "Repository is already clean."
-            )
-            return
-
-        solution_changes = (
-            self._change_detector.get_solution_changes()
-        )
-
-        if not solution_changes:
-            self._logger.warning(
-                "No solution changes detected."
-            )
-            return
-
-        commit_message = None
-
-        for change in solution_changes:
-
-            self._logger.info(
-                f"{change.status} -> {change.path}"
+                f"Starting automation for: {path}"
             )
 
-            if commit_message is None:
+            try:
+                solution = self._parser.parse(path)
 
-                commit_message = (
-                    self._commit_generator.generate(
-                        change
-                    )
+            except ValueError as error:
+                self._logger.error(str(error))
+                return
+
+            commit_message = (
+                self._commit_generator.generate(
+                    solution
                 )
+            )
+
+            self._logger.info(
+                f"Commit message: {commit_message}"
+            )
+
+            if self._git.repository_clean():
+                self._logger.info(
+                    "Repository is already clean."
+                )
+                return
+
+            solution_changes = (
+                self._change_detector.get_solution_changes()
+            )
+
+            if not solution_changes:
+                self._logger.warning(
+                    "No solution changes detected."
+                )
+                return
+
+            self._logger.info(
+                "Detected Git changes:"
+            )
+
+            for change in solution_changes:
 
                 self._logger.info(
-                    f"Commit message: {commit_message}"
+                    f"{change.status} -> {change.path}"
                 )
 
-        self._readme.update()
+            self._readme.update()
 
-        self._logger.info(
-            "README updated successfully."
-        )
+            self._logger.info(
+                "README updated successfully."
+            )
 
-        self._git.add()
+            self._git.add()
 
-        self._logger.info(
-            "Files staged successfully."
-        )
+            self._logger.info(
+                "Files staged successfully."
+            )
 
-        if commit_message:
-
-            self._git.commit(commit_message)
+            self._git.commit(
+                commit_message
+            )
 
             self._logger.info(
                 "Commit created successfully."
+            )
+
+        except Exception as error:
+
+            self._logger.error(
+                f"Automation failed: {error}"
             )

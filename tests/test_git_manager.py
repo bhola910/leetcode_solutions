@@ -1,4 +1,6 @@
-from leetcode_automation.managers.git_manager import GitManager
+from leetcode_automation.managers.git_manager import (
+    GitManager,
+)
 
 
 def main():
@@ -12,28 +14,21 @@ def main():
     print("Repository Clean:")
     print(git.repository_clean())
 
+    print()
+
+    print("Repository Exists:")
+    print(git.repository_exists())
+
+    print()
+
+    print("Has Remote:")
+    print(git.has_remote())
+
+    print()
+
+    print("Branch 'main' Exists:")
+    print(git.branch_exists("main"))
+
 
 if __name__ == "__main__":
     main()
-
-class GitManager:
-    """Provides Git-related operations."""
-
-    def __init__(self) -> None:
-        """Initialize the Git manager."""
-
-        self._logger = Logger()
-
-    def status(self) -> str:
-        """Return the current Git status."""
-
-        self._logger.info("Running git status...")
-
-        result = subprocess.run(
-            ["git", "status"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-
-        return result.stdout

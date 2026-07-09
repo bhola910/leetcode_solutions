@@ -4,37 +4,27 @@ commit_message_generator.py
 Generates Git commit messages.
 """
 
-from pathlib import Path
-
-from leetcode_automation.models.change import Change
+from leetcode_automation.models.solution import (
+    Solution,
+)
 
 
 class CommitMessageGenerator:
     """Generates commit messages."""
 
-    def generate(self, change: Change) -> str:
+    def generate(
+        self,
+        solution: Solution,
+    ) -> str:
         """Generate a commit message."""
 
-        solution_name = (
-            Path(change.path)
-            .stem
-            .replace("_", " ")
-            .title()
-        )
+        language = solution.language.lower()
 
-        if change.status == "??":
-            action = "add"
-
-        elif change.status == "M":
-            action = "update"
-
-        elif change.status == "D":
-            action = "remove"
-
-        else:
-            action = "update"
+        if language == "c++":
+            language = "cpp"
 
         return (
-            f"feat(leetcode): "
-            f"{action} {solution_name} solution"
+            f"feat({language}): "
+            f"solve {solution.title} "
+            f"(#{solution.number})"
         )
